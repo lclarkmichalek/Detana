@@ -21,6 +21,8 @@ DiamondSquare::DiamondSquare(uint width, uint height,
 }
 
 DiamondSquare::~DiamondSquare() {
+    for (uint i = 0; i != _hm_size; i++)
+        delete[] _hm[i];
     delete[] _hm;
 }
 
