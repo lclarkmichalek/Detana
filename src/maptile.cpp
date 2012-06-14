@@ -6,6 +6,10 @@
 float water_level = 0.25;
 float mount_level = 0.6;
 
+void MapTile::draw(TCODConsole* console, int x, int y) const {
+    console->setCharBackground(x, y, _color);
+}
+
 void MapTile::calculateBiomes() {
     if (_height < water_level)
         _biomes = Biomes::sea;

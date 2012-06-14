@@ -23,7 +23,7 @@ int main() {
     for(uint x = 0; x != length; x++) {
         for(uint y = 0; y != length; y++) {
             MapTile& tile = mapgen.at(x, y);
-            root->setCharBackground(x, y, tile.getColor());
+            tile.draw(root, x, y);
         }
     }
     root->flush();

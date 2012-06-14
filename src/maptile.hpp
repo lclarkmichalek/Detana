@@ -14,6 +14,8 @@ public:
 
     float& getHeight() {return _height;};
     Biomes& getBiomes() {return _biomes;};
+
+    void draw(TCODConsole* console, int x, int y) const;
 private:
     float _height;
     bool _colored = false;

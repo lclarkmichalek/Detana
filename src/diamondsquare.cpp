@@ -11,7 +11,7 @@ DiamondSquare::DiamondSquare(uint width, uint height,
     if (_rough < 0 || _rough > 1)
         _fail("Rough must be between 0 and 1");
 
-    _iterations = int(ceil(log((std::max(width, height) - 1) / log(2)))) + 2;
+    _iterations = int(ceil(log((std::max(width, height) - 1) / log(2)))) + 1;
     _hm_size = pow(2, _iterations) + 1;
     _hm = new float*[_hm_size];
     for(uint i = 0; i < _hm_size; i++)
