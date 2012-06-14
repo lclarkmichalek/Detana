@@ -10,7 +10,7 @@
 #include "mapgenerator.hpp"
 
 MapGenerator::MapGenerator(char size_n, int seed, double rough)
-    : _size(pow(2, size_n) + 1),
+    : _size(pow(2, size_n)),
       _seed(seed),
       _rough(rough),
       _height_map(_size, _size, seed, rough) {
@@ -27,13 +27,16 @@ MapGenerator::MapGenerator(char size_n, int seed, double rough)
     std::cout << "Generating map of dimensions " <<
         _hm.size() << "x" << _hm.at(0).size() << std::endl;
 
-    //    _height_map = DiamondSquare(_size, _size, seed, rough);
-
     _rng.seed(seed);
 }
 
 bool MapGenerator::genHeightMap() {
     _height_map.generate();
+    for (int x = 0; x != _size; x++) {
+        for (int y = 0; y != _size; y++) {
+            at(x, y).getHeight() = _height_map.at(x, y);
+        }
+    }
     //    generateSortedHeights();
 
     return true;
@@ -43,9 +46,8 @@ void MapGenerator::colorTiles() {
     for (int x = 0; x != _size; x++) {
         for (int y = 0; y != _size; y++) {
             MapTile& tile = at(x, y);
-            tile.setColor(TCODColor::lerp(TCODColor::white,
-                                          TCODColor::black,
-                                          _height_map.at(x, y)));
+            tile.calculateBiomes();
+            tile.calculateColor();
         }
     }
 }
@@ -81,77 +83,6 @@ std::vector<coord> MapGenerator::get_neighbours(coord c) {
     if (c.first != _size - 1)
         coords.push_back(std::make_pair(c.first + 1, c.second));
     return coords;
-}
-
-bool MapGenerator::setHeightRegions() {
-    float water_proportion = 0.25;
-    float earth_proportion = 0.75;
-    MapTile top_water = at(_height_order[water_proportion *
-                                         _height_order.size()]);
-    MapTile top_earth = at(_height_order[earth_proportion *
-                                         _height_order.size()]);
-    MapTile top = at(_height_order[_height_order.size() - 1]);
-    std::cout << "Water height: " << top_water.getHeight() << std::endl;
-    std::cout << "Earth height: " << top_earth.getHeight() << std::endl;
-    std::cout << "Top: " << top.getHeight() << std::endl;
-    for (auto coord = _height_order.begin();
-         coord != _height_order.end(); coord++) {
-        MapTile& tile = at(*coord);
-        if (tile.getHeight() < top_water.getHeight()) {
-            tile.getBiomes() = Biomes::sea;
-
-            TCODColor from;
-            if (random() < 0.95)
-                from = TCODColor::darkAzure;
-            else
-                from = TCODColor::darkSky;
-            float lerp_factor = 1 - tile.getHeight()/top_water.getHeight();
-            TCODColor color = TCODColor::lerp(from,
-                                              TCODColor::black,
-                                              lerp_factor);
-            tile.setColor(color);
-        } else if (tile.getHeight() < top_earth.getHeight()) {
-            tile.getBiomes() = Biomes::lowland;
-
-            float lerp_factor = (tile.getHeight() - top_water.getHeight()) /
-                (top_earth.getHeight() - top_water.getHeight());
-            TCODColor from;
-            float rand = random();
-            if (rand < 0.2)
-                from = TCODColor::darkSepia;
-            else
-                from = TCODColor::darkerGreen;
-            TCODColor color = TCODColor::lerp(from,
-                                              TCODColor::darkerGrey,
-                                              lerp_factor);
-            tile.setColor(color);
-        } else {
-            tile.getBiomes() = Biomes::highland;
-
-            float lerp_factor = (tile.getHeight() - top_earth.getHeight()) /
-                (top.getHeight() - top_earth.getHeight());
-            TCODColor color = TCODColor::lerp(TCODColor::darkerGrey,
-                                              TCODColor::white,
-                                              lerp_factor);
-            tile.setColor(color);
-        }
-    }
-
-    for (auto coord = _height_order.begin();
-         coord != _height_order.end(); coord++) {
-        if (at(*coord).getBiomes() != Biomes::sea)
-            continue;
-        auto neighbours = get_neighbours(*coord);
-        for(auto neigh = neighbours.begin();
-            neigh != neighbours.end(); neigh++) {
-            MapTile& tile = at(*neigh);
-            if (tile.getBiomes() == Biomes::lowland && random() < 0.2) {
-                tile.getBiomes() = Biomes::beach;
-                tile.setColor(TCODColor::lightAmber);
-            }
-        }
-    }
-    return true;
 }
 
 bool MapGenerator::applyHumidity() {
