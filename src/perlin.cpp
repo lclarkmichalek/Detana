@@ -10,6 +10,10 @@ Perlin::Perlin(uint width, uint height, int seed) :
 }
 
 float Perlin::at(float x, float y) const {
+    // As whole number points return 0, divide by an irrational number
+    x /= M_PI;
+    y /= M_PI;
+
     // point
     vec p = vec(x, y);
 
