@@ -4,23 +4,38 @@
 
 #include "libtcod/libtcod.hpp"
 
-typedef enum { sea, beach, lowland, highland } Biomes;
+enum Biomes { Sea,
+               AridDesert,
+               XericShrubland,
+               DrySteppe,
+               TemperateSteppe,
+               Taiga,
+               Tundra,
+               SemiaridDesert,
+               GrassSavanna,
+               TemperateForest,
+               AlpineTundra,
+               TropicalRainforest,
+               SubtropicalRainforest,
+               MonsoonForest,
+               England
+};
 
 class MapTile {
 public:
     void calculateBiomes();
     void calculateColor();
-    TCODColor getColor() const;
-
-    float& getHeight() {return _height;};
-    Biomes& getBiomes() {return _biomes;};
-
     void draw(TCODConsole* console, int x, int y) const;
-private:
-    float _height;
-    bool _colored = false;
-    TCODColor _color;
-    Biomes _biomes;
 
+    void setProperties(float height, float temp, float humidity);
+
+    float height;
+    float temp;
+    float humidity;
+    TCODColor color;
+    Biomes biomes;
+
+private:
+    bool _colored = false;
     void _fail(std::string message, char code = 1) const;
 };
