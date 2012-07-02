@@ -4,6 +4,8 @@
 #include <vector>
 #include <utility>
 
+#include <noise/noise.h>
+
 #include "maptile.hpp"
 #include "diamondsquare.hpp"
 
@@ -46,12 +48,14 @@ private:
     short _pass_number;
 
     DiamondSquare _height_map;
+    noise::model::Plane _temprature_map;
+    noise::model::Plane _humidity_map;
 
     //    void generateSortedHeights();
     // Returns the surrounding points
     std::vector<coord> get_neighbours(coord);
 
     inline float& gh(int x, int y) {
-        return _hm.at(x%_hm.size()).at(y%_hm.at(0).size()).getHeight();
+        return _hm.at(x%_hm.size()).at(y%_hm.at(0).size()).height;
     };
 };

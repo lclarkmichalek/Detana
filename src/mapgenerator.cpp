@@ -9,6 +9,24 @@
 
 #include "mapgenerator.hpp"
 
+noise::module::Curve* curve_modifier(noise::module::Module* mod,
+                                     double f(double)) {
+    noise::module::Curve* curved = new noise::module::Curve;
+    for (double x = -1; x < 1.0; x += 0.9) {
+        double y = f(x);
+        curved->AddControlPoint(x, y);
+    }
+    curved->SetSourceModule(0, *mod);
+    return curved;
+}
+
+noise::module::Clamp* clamp_modifier(noise::module::Module* mod) {
+    noise::module::Clamp* clamped = new noise::module::Clamp;
+    clamped->SetBounds(-1, 1);
+    clamped->SetSourceModule(0, *mod);
+    return clamped;
+}
+
 MapGenerator::MapGenerator(char size_n, int seed, double rough)
     : _size(pow(2, size_n)),
       _seed(seed),
@@ -28,13 +46,29 @@ MapGenerator::MapGenerator(char size_n, int seed, double rough)
         _hm.size() << "x" << _hm.at(0).size() << std::endl;
 
     _rng.seed(seed);
+
+    noise::module::Perlin* rain_map = new noise::module::Perlin;
+    rain_map->SetSeed(seed);
+    rain_map->SetFrequency(0.05);
+    _humidity_map =
+        noise::model::Plane(*curve_modifier(clamp_modifier(rain_map),
+                             [](double x){return (pow(x, 3) + x + 2)/4;}));
+
+    noise::module::Perlin* temp_map = new noise::module::Perlin;
+    temp_map->SetSeed(seed *123653);
+    temp_map->SetFrequency(0.01);
+    _temprature_map =
+        noise::model::Plane(*curve_modifier(clamp_modifier(temp_map),
+                             [](double x) {return (pow(x, 3) + x + 2)/4;}));
 }
 
 bool MapGenerator::genHeightMap() {
     _height_map.generate();
     for (int x = 0; x != _size; x++) {
         for (int y = 0; y != _size; y++) {
-            at(x, y).getHeight() = _height_map.at(x, y);
+            at(x, y).setProperties(_height_map.at(x, y),
+                                   _temprature_map.GetValue(x, y),
+                                   _humidity_map.GetValue(x, y));
         }
     }
     //    generateSortedHeights();
