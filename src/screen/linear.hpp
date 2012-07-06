@@ -8,17 +8,16 @@
 #include "./widget.hpp"
 #include "./layout.hpp"
 
-class LinearLayout : Layout {
+class LinearLayout : public Layout {
 public:
     LinearLayout();
     LinearLayout(TCODColor border_color);
-    ~LinearLayout();
 
-    uchar addWidget(std::shared_ptr<Widget> w);
-    std::shared_ptr<Widget> getWidget(uchar p);
+    unsigned char addWidget(std::shared_ptr<Widget> w);
+    std::shared_ptr<Widget> getWidget(unsigned char p);
     void clearWidgets();
 
-    void setSizeBias(uchar p, float bias);
+    void setSizeBias(unsigned char p, float bias);
     void setSize(uint x, uint y);
     void setBorder(bool e, TCODColor c);
 protected:
@@ -31,12 +30,14 @@ protected:
     uint _width, _height;
 };
 
-class HorizontalLayout : LinearLayout {
+class HorizontalLayout : public LinearLayout {
 public:
+    HorizontalLayout(TCODColor color) : LinearLayout(color) {};
     void draw(TCODConsole* c, uint x=0, uint y=0);
 };
 
-class VerticalLayout : LinearLayout {
+class VerticalLayout : public LinearLayout {
 public:
+    VerticalLayout(TCODColor color) : LinearLayout(color) {};
     void draw(TCODConsole* c, uint x=0, uint y=0);
 };

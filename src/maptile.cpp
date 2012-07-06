@@ -131,7 +131,7 @@ void MapTile::calculateColor() {
         to = TCODColor::lighterSea;
         lerp = 1 - (temp -vcold_temp) / vcold_temp;
     }
-        /*
+
     case Biomes::SemiaridDesert: {
         from = TCODColor::darkAmber;
         to = TCODColor::lightLime;
@@ -144,11 +144,12 @@ void MapTile::calculateColor() {
         lerp = 1 - (temp - hot_temp) / (vhot_temp - hot_temp);
         break;
     }
-        */
+
     default: {
         //        _fail("Colouring tile without a biomes");
     }
     }
+    std::cout << lerp << std::endl;
     color = TCODColor::lerp(from, to, lerp);
     _colored = true;
 }

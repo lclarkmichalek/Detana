@@ -1,5 +1,6 @@
 #include "linear.hpp"
 
+#include <iostream>
 #include <vector>
 #include <memory>
 
@@ -22,14 +23,14 @@ LinearLayout::LinearLayout(TCODColor border_color)
     return;
 }
 
-uchar LinearLayout::addWidget(std::shared_ptr<Widget> w) {
+unsigned char LinearLayout::addWidget(std::shared_ptr<Widget> w) {
     int index = _widgets.size();
     _widgets.push_back(w);
     _biases.push_back(1);
     return index;
 }
 
-std::shared_ptr<Widget> LinearLayout::getWidget(uchar index) {
+std::shared_ptr<Widget> LinearLayout::getWidget(unsigned char index) {
     return _widgets.at(index); // .at throws
 }
 
@@ -38,7 +39,7 @@ void LinearLayout::clearWidgets() {
     _biases.clear();
 }
 
-void LinearLayout::setSizeBias(uchar p, float bias) {
+void LinearLayout::setSizeBias(unsigned char p, float bias) {
     if (p >= _biases.size())
         return;
     _biases[p] = bias;
@@ -55,15 +56,26 @@ void LinearLayout::setBorder(bool e, TCODColor c) {
         _border_color = c;
 }
 
-void HorizontalLayout::draw(TCODConsole* c, int off_x, int off_y) {
+void hline(TCODConsole* c, uint x, uint y, uint len, TCODColor color) {
+    c->setDefaultBackground(color);
+    c->setDefaultForeground(color);
+    c->hline(x, y, len, TCOD_BKGND_SET);
+}
+
+void vline(TCODConsole* c, uint x, uint y, uint len, TCODColor color) {
+    c->setDefaultBackground(color);
+    c->setDefaultForeground(color);
+    c->vline(x, y, len, TCOD_BKGND_SET);
+}
+
+void HorizontalLayout::draw(TCODConsole* c, uint off_x, uint off_y) {
     uint awidth = _width;
     uint aheight = _height;
 
     if (_border) {
-        c->setDefaultForeground(_border_color);
-        c->hline(off_x, off_y, _width);
-        c->hline(off_x, off_y + _height, _width);
-        c->vline(off_x, off_y, _height);
+        hline(c, off_x, off_y, _width - 1, _border_color);
+        hline(c, off_x, off_y + _height - 1, _width - 1, _border_color);
+        vline(c, off_x, off_y, _height, _border_color);
 
         awidth -= _biases.size() + 1;
         aheight -= 2;
@@ -74,33 +86,33 @@ void HorizontalLayout::draw(TCODConsole* c, int off_x, int off_y) {
     float total_biases = 0;
     for(auto i = _biases.begin(); i != _biases.end(); i++)
         total_biases += *i;
-    float per_bias = awidth / total_bias;
+    float per_bias = awidth / total_biases;
 
     int x = off_x;
-    for (auto b = _biases.begin(), auto w = _widgets.begin();
-         b != _biases.end(); b++, w++) {
+    auto b = _biases.begin();
+    auto w = _widgets.begin();
+    while (b != _biases.end()) {
 
         int width = per_bias * (*b);
         (*w)->setSize(width, aheight);
         (*w)->draw(c, x, off_y);
         if (_border) {
-            c->setDefaultForeground(_border_color);
-            c->vline(x+width, off_y, aheight);
+            vline(c, x+width, off_y, aheight, _border_color);
             x += width + 1;
         } else
             x += width;
+        b++; w++;
     }
 }
 
-void VerticalLayout::draw(TCODConsole* c, int off_x, int off_y) {
+void VerticalLayout::draw(TCODConsole* c, uint off_x, uint off_y) {
     uint awidth = _width;
     uint aheight = _height;
 
     if (_border) {
-        c->setDefaultForeground(_border_color);
-        c->vline(off_x, off_y, _height);
-        c->vline(off_x + _width, off_y, _height);
-        c->hline(off_x, off_y, _width);
+        vline(c, off_x, off_y, _height - 1, _border_color);
+        vline(c, off_x + _width - 1, off_y, _height - 1, _border_color);
+        hline(c, off_x, off_y, _width, _border_color);
 
         aheight -= _biases.size() + 1;
         awidth -= 2;
@@ -111,20 +123,20 @@ void VerticalLayout::draw(TCODConsole* c, int off_x, int off_y) {
     float total_biases = 0;
     for(auto i = _biases.begin(); i != _biases.end(); i++)
         total_biases += *i;
-    float per_bias = aheight / total_bias;
+    float per_bias = aheight / total_biases;
 
     int y = off_y;
-    for (auto b = _biases.begin(), auto w = _widgets.begin();
-         b != _biases.end(); b++, w++) {
-
+    auto b = _biases.begin();
+    auto w = _widgets.begin();
+    while (b != _biases.end()) {
         int height = per_bias * (*b);
         (*w)->setSize(awidth, height);
         (*w)->draw(c, off_x, y);
         if (_border) {
-            c->setDefaultForeground(_border_color);
-            c->hline(off_x, y + height, aheight);
+            hline(c, off_x, y + height, aheight + 1, _border_color);
             y += height + 1;
         } else
             y += height;
+        b++; w++;
     }
 }

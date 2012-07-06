@@ -6,12 +6,12 @@
 
 #include "./widget.hpp"
 
-class Layout : Widget {
+class Layout : public Widget {
 public:
-    virtual uchar addWidget(std::shared_ptr<Widget> w) = 0;
-    virtual std::shared_ptr<Widget> getWidget(uchar p) = 0;
+    virtual unsigned char addWidget(std::shared_ptr<Widget> w) = 0;
+    virtual std::shared_ptr<Widget> getWidget(unsigned char p) = 0;
     virtual void clearWidgets() = 0;
 
-    virtual void setSizeBias(uchar p, float bias) = 0;
+    virtual void setSizeBias(unsigned char p, float bias) = 0;
     virtual void setBorder(bool e, TCODColor c=TCODColor::black) = 0;
 };
